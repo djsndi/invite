@@ -1,0 +1,1222 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>有人想约你</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&family=Noto+Serif+SC:wght@400;500&display=swap">
+<style>
+/* 布局：一屏一页的邀请卡 —— 固定黄昏小镇场景 + 金色花藤边框，内容逐页推进 */
+:root {
+  --night:    #1b1038;   /* 夜空顶 */
+  --plum:     #46255f;   /* 中段紫 */
+  --rose:     #a65579;   /* 近地平线玫瑰 */
+  --ember:    #e3996a;   /* 落日余烬 */
+  --ground:   #241546;   /* 湿地面 */
+  --gold:     #e8c07a;   /* 主金 */
+  --gold-hi:  #fbe6b4;   /* 高光金 */
+  --gold-dim: #8a7040;   /* 暗金描边 */
+  --cream:    #fdf6ea;   /* 正文白 */
+  --soft:     #c9b9d8;   /* 次要文字 */
+  --glass:    rgba(32, 18, 56, .62);
+  --glass-2:  rgba(46, 27, 74, .78);
+  --hair:     rgba(232, 192, 122, .22);
+  --sans: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+  --serif: "Noto Serif SC", "Songti SC", serif;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; margin: 0; }
+
+body {
+  background: var(--night);
+  color: var(--cream);
+  font-family: var(--sans);
+  font-weight: 300;
+  overflow: hidden;
+}
+
+/* ───────── 场景 ───────── */
+.scene { position: fixed; inset: 0; overflow: hidden; z-index: 0; }
+
+.scene {
+  background: linear-gradient(180deg, #2b1030 0%, #5e1f45 32%, #a8406a 52%, #6e3360 62%, #2a1540 100%);
+}
+.sakura { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.hearts { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.haze {
+  position: absolute; inset: 0;
+  background: radial-gradient(62% 48% at 50% 50%, transparent 34%, rgba(20,10,40,.38) 100%);
+}
+
+/* ───────── 金色边框 ───────── */
+.frame { position: fixed; inset: 10px; z-index: 2; pointer-events: none; }
+.frame::before {
+  content: "";
+  position: absolute; inset: 0;
+  border: 1px solid rgba(232,192,122,.32);
+  border-radius: 6px;
+}
+.frame .dia {
+  position: absolute; left: 50%; transform: translateX(-50%);
+  display: flex; gap: 7px; align-items: center;
+}
+.frame .dia span {
+  width: 5px; height: 5px;
+  background: var(--gold);
+  transform: rotate(45deg);
+  opacity: .75;
+}
+.frame .dia span:nth-child(2) { width: 7px; height: 7px; opacity: 1; }
+.frame .dia.top { top: -3px; }
+.frame .dia.bot { bottom: -3px; }
+.vine { position: absolute; width: 112px; height: 112px; opacity: .92; }
+.vine.tl { top: 2px; left: 2px; }
+.vine.tr { top: 2px; right: 2px; transform: scaleX(-1); }
+.vine.bl { bottom: 2px; left: 2px; transform: scaleY(-1); }
+.vine.br { bottom: 2px; right: 2px; transform: scale(-1); }
+
+/* ───────── 页面结构 ───────── */
+.stage {
+  position: relative; z-index: 1;
+  height: 100%;
+  display: flex; flex-direction: column;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+
+.topbar {
+  flex: 0 0 auto;
+  display: flex; align-items: center; justify-content: space-between;
+  gap: .75rem;
+  padding-block: .9rem .3rem;
+  min-height: 3rem;
+}
+.brandmark {
+  font-size: 1.02rem; font-weight: 500; letter-spacing: .06em;
+  color: var(--cream);
+}
+.chip-btn {
+  display: inline-flex; align-items: center; gap: .4rem;
+  background: var(--glass); border: 1px solid var(--hair);
+  color: var(--cream); font-family: var(--sans); font-size: .82rem; font-weight: 400;
+  padding: .42rem .85rem; border-radius: 999px; cursor: pointer;
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+  transition: border-color .18s, background .18s;
+}
+.chip-btn:hover { border-color: rgba(232,192,122,.5); }
+.icon-btn {
+  width: 2.3rem; height: 2.3rem; flex: 0 0 auto;
+  display: grid; place-items: center;
+  border-radius: 50%;
+  background: var(--glass); border: 1px solid var(--hair);
+  color: var(--gold); cursor: pointer;
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+}
+.icon-btn svg { width: 1.05rem; height: 1.05rem; }
+button:focus-visible, .pick:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+
+.pages { flex: 1 1 auto; position: relative; min-height: 0; }
+.page {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-block: .4rem 1.1rem;
+  animation: rise .5s cubic-bezier(.22,.8,.3,1) both;
+}
+@keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+
+.mid { margin: auto 0; display: grid; gap: 1.15rem; justify-items: center; text-align: center; width: 100%; }
+.bottom { flex: 0 0 auto; display: grid; gap: .75rem; justify-items: center; padding-top: 1.2rem; }
+
+/* ───────── 文字 ───────── */
+.eyebrow {
+  font-family: var(--serif);
+  font-size: .78rem; letter-spacing: .2em; color: var(--soft);
+}
+.to-chip {
+  font-family: var(--serif);
+  font-size: .95rem; letter-spacing: .22em; color: var(--cream);
+  border: 1px solid var(--hair); border-radius: 4px;
+  padding: .5rem 1.3rem;
+  background: var(--glass);
+  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+}
+h1 {
+  font-weight: 900;
+  font-size: clamp(1.9rem, 8.6vw, 2.5rem);
+  line-height: 1.34;
+  letter-spacing: .03em;
+  margin: 0;
+  text-wrap: balance;
+  text-shadow: 0 2px 18px rgba(20,8,40,.75);
+}
+h1 .glow {
+  background: linear-gradient(180deg, var(--gold-hi), var(--gold) 55%, #d4a35c);
+  -webkit-background-clip: text; background-clip: text;
+  color: transparent;
+}
+.lede {
+  font-family: var(--serif);
+  font-size: .9rem; line-height: 2.1; color: var(--soft);
+  margin: 0; max-width: 22ch;
+  text-shadow: 0 1px 10px rgba(20,8,40,.8);
+}
+.divider { display: flex; align-items: center; gap: .55rem; opacity: .6; }
+.divider i {
+  display: block; width: 3px; height: 3px; background: var(--gold); transform: rotate(45deg);
+}
+.divider b { display: block; width: 46px; height: 1px; background: linear-gradient(90deg, transparent, var(--gold-dim), transparent); }
+.from { font-family: var(--serif); font-size: .82rem; letter-spacing: .2em; color: var(--soft); }
+
+/* ───────── 按钮 ───────── */
+.btn-gold {
+  font-family: var(--sans); font-weight: 500;
+  font-size: 1.04rem; letter-spacing: .08em;
+  color: #4a3307;
+  background: linear-gradient(180deg, #fbe6b4, #e8c07a 48%, #d9a856);
+  border: none; border-radius: 999px;
+  padding: .92rem 2.3rem;
+  cursor: pointer;
+  box-shadow: 0 10px 30px rgba(190,140,60,.28), inset 0 1px 0 rgba(255,255,255,.6);
+  transition: transform .16s, box-shadow .16s;
+}
+.btn-gold:active { transform: translateY(1px); }
+.btn-gold.wide { width: 100%; max-width: 22rem; }
+.btn-gold:disabled {
+  background: linear-gradient(180deg, rgba(120,100,140,.5), rgba(80,64,104,.5));
+  color: rgba(253,246,234,.42); box-shadow: none; cursor: not-allowed;
+}
+.btn-dark {
+  font-family: var(--sans); font-weight: 400; font-size: 1rem;
+  color: var(--cream);
+  background: var(--glass-2);
+  border: 1px solid var(--hair); border-radius: 999px;
+  padding: .92rem 1.9rem; cursor: pointer;
+  backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+}
+.btn-dark.wide { width: 100%; max-width: 22rem; }
+.btn-row { display: flex; gap: .8rem; flex-wrap: wrap; justify-content: center; width: 100%; }
+
+/* ───────── 信封 ───────── */
+.envelope { width: min(76%, 17rem); filter: drop-shadow(0 22px 40px rgba(20,8,40,.6)); }
+@keyframes float { 0%,100% { transform: translateY(0) rotate(-3deg); } 50% { transform: translateY(-9px) rotate(-3deg); } }
+.envelope { animation: float 5.5s ease-in-out infinite; }
+
+/* ───────── 选项 ───────── */
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: .7rem; width: 100%; max-width: 24rem; }
+.list { display: grid; gap: .6rem; width: 100%; max-width: 24rem; }
+
+.pick {
+  position: relative;
+  display: flex; align-items: center; gap: .8rem;
+  background: var(--glass-2);
+  border: 1px solid var(--hair);
+  border-radius: 14px;
+  padding: .85rem 1rem;
+  cursor: pointer; text-align: left;
+  color: var(--cream); font-family: var(--sans); font-size: .98rem; font-weight: 400;
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  transition: border-color .18s, background .18s, transform .18s;
+  min-width: 0;
+}
+.pick:hover { border-color: rgba(232,192,122,.45); }
+.pick.tile { flex-direction: column; gap: .55rem; padding: 1.1rem .7rem; text-align: center; }
+.pick .emo {
+  flex: 0 0 auto;
+  width: 2.5rem; height: 2.5rem; border-radius: 50%;
+  display: grid; place-items: center;
+  font-size: 1.3rem; line-height: 1;
+  background: radial-gradient(circle at 32% 28%, #fff9ec, #e9d7bb 70%, #c9b396);
+  box-shadow: inset 0 -2px 4px rgba(120,90,60,.25), 0 3px 10px rgba(20,8,40,.4);
+}
+.pick.tile .emo { width: 3.3rem; height: 3.3rem; font-size: 1.75rem; }
+.pick .txt { min-width: 0; overflow-wrap: anywhere; }
+.pick[aria-pressed="true"] {
+  border-color: var(--gold);
+  background: linear-gradient(180deg, rgba(232,192,122,.16), rgba(232,192,122,.05)), var(--glass-2);
+}
+.pick[aria-pressed="true"]::after {
+  content: "✓";
+  position: absolute; top: .5rem; right: .55rem;
+  width: 1.25rem; height: 1.25rem; border-radius: 50%;
+  display: grid; place-items: center;
+  font-size: .72rem; color: #4a3307;
+  background: linear-gradient(180deg, #fbe6b4, #e0b268);
+}
+.tag {
+  position: absolute; top: .5rem; left: .55rem;
+  font-size: .62rem; letter-spacing: .08em; font-weight: 400;
+  color: var(--gold-hi);
+  background: rgba(70,40,20,.6); border: 1px solid rgba(232,192,122,.35);
+  border-radius: 4px; padding: .1rem .35rem;
+}
+.pick.tile .tag { top: .45rem; left: .45rem; }
+.pick.row-tag { padding-right: 4.6rem; }
+.pick .tag-r {
+  position: absolute; top: 50%; right: .7rem; transform: translateY(-50%);
+  font-size: .64rem; letter-spacing: .08em;
+  color: var(--gold-hi);
+  background: rgba(70,40,20,.55); border: 1px solid rgba(232,192,122,.3);
+  border-radius: 4px; padding: .14rem .4rem;
+}
+.pick[aria-pressed="true"] .tag-r { right: 2.4rem; }
+
+.add {
+  width: 100%; max-width: 24rem;
+  background: rgba(32,18,56,.45);
+  border: 1px dashed rgba(232,192,122,.32);
+  border-radius: 14px; padding: .85rem 1rem;
+  color: var(--soft); font-family: var(--sans); font-size: .95rem;
+  cursor: pointer;
+}
+.add:hover { color: var(--gold); border-color: rgba(232,192,122,.55); }
+
+input[type="text"] {
+  width: 100%; max-width: 24rem;
+  background: var(--glass-2);
+  border: 1px solid var(--hair); border-radius: 14px;
+  color: var(--cream); font-family: var(--sans); font-size: .98rem;
+  padding: .85rem 1rem;
+}
+input[type="text"]:focus { outline: none; border-color: var(--gold); }
+input::placeholder { color: rgba(201,185,216,.55); }
+
+/* ───────── 结果卡 ───────── */
+.card {
+  width: 100%; max-width: 24rem;
+  background: var(--glass-2);
+  border: 1px solid var(--hair); border-radius: 18px;
+  padding: .4rem 1.15rem;
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  text-align: left;
+}
+.card .line {
+  display: flex; align-items: center; gap: .7rem;
+  padding-block: .95rem;
+  border-bottom: 1px solid rgba(232,192,122,.14);
+}
+.card .line:last-child { border-bottom: none; }
+.card .k { flex: 0 0 3.2rem; font-size: .82rem; color: var(--soft); }
+.card .v { display: flex; align-items: center; gap: .5rem; min-width: 0; overflow-wrap: anywhere; font-size: 1rem; }
+.card .v .emo { width: 1.9rem; height: 1.9rem; font-size: 1rem; }
+
+.sent { font-family: var(--serif); font-size: .86rem; color: var(--soft); margin: 0; }
+.copybox {
+  width: 100%; max-width: 24rem;
+  background: rgba(16,8,32,.7);
+  border: 1px solid var(--hair); border-radius: 12px;
+  padding: .8rem .9rem; margin: 0;
+  font-family: var(--sans); font-size: .82rem; line-height: 1.9;
+  white-space: pre-wrap; overflow-wrap: anywhere; color: var(--soft);
+  text-align: left;
+}
+.note-mini { font-size: .76rem; color: rgba(201,185,216,.75); margin: 0; }
+.ok-flash { font-size: .84rem; color: var(--gold); margin: 0; }
+
+.made { flex: 0 0 auto; text-align: center; font-size: .68rem; letter-spacing: .12em; color: rgba(201,185,216,.45); padding-block: .5rem .9rem; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, .envelope { animation: none !important; transition: none !important; }
+}
+@media (min-width: 560px) {
+  .stage { max-width: 30rem; margin: 0 auto; }
+}
+</style>
+
+<div class="scene" aria-hidden="true">
+  <canvas class="sakura" id="sakura"></canvas>
+  <canvas class="hearts" id="hearts"></canvas>
+  <div class="haze"></div>
+</div>
+
+<div class="frame" aria-hidden="true">
+  <div class="dia top"><span></span><span></span><span></span></div>
+  <div class="dia bot"><span></span><span></span><span></span></div>
+  <svg class="vine tl" viewBox="0 0 120 120" fill="none">
+    <path d="M4 56 C4 30 26 6 54 4" stroke="#c9a46a" stroke-width="1.2" opacity=".85"/>
+    <path d="M10 62 C14 36 34 16 60 12" stroke="#8a7040" stroke-width="1" opacity=".7"/>
+    <g fill="#d98fa8" opacity=".9">
+      <circle cx="18" cy="38" r="4.6"/><circle cx="40" cy="14" r="4"/><circle cx="7" cy="64" r="3.4"/>
+    </g>
+    <g fill="#f0c6d6" opacity=".9">
+      <circle cx="18" cy="38" r="1.8"/><circle cx="40" cy="14" r="1.6"/><circle cx="7" cy="64" r="1.4"/>
+    </g>
+    <g stroke="#7fa06a" stroke-width="1.1" opacity=".8">
+      <path d="M26 30 q10 -6 16 2"/><path d="M14 50 q-6 8 2 14"/><path d="M52 10 q8 4 8 12"/>
+    </g>
+    <g fill="#7fa06a" opacity=".55">
+      <ellipse cx="34" cy="31" rx="6" ry="3" transform="rotate(-24 34 31)"/>
+      <ellipse cx="16" cy="58" rx="5.4" ry="2.8" transform="rotate(52 16 58)"/>
+      <ellipse cx="58" cy="20" rx="5.6" ry="2.8" transform="rotate(14 58 20)"/>
+    </g>
+  </svg>
+  <svg class="vine tr" viewBox="0 0 120 120" fill="none">
+    <path d="M4 56 C4 30 26 6 54 4" stroke="#c9a46a" stroke-width="1.2" opacity=".85"/>
+    <path d="M10 62 C14 36 34 16 60 12" stroke="#8a7040" stroke-width="1" opacity=".7"/>
+    <g fill="#d98fa8" opacity=".9"><circle cx="18" cy="38" r="4.6"/><circle cx="40" cy="14" r="4"/></g>
+    <g fill="#f0c6d6" opacity=".9"><circle cx="18" cy="38" r="1.8"/><circle cx="40" cy="14" r="1.6"/></g>
+    <g fill="#7fa06a" opacity=".5">
+      <ellipse cx="34" cy="31" rx="6" ry="3" transform="rotate(-24 34 31)"/>
+      <ellipse cx="58" cy="20" rx="5.6" ry="2.8" transform="rotate(14 58 20)"/>
+    </g>
+  </svg>
+  <svg class="vine bl" viewBox="0 0 120 120" fill="none">
+    <path d="M4 56 C4 30 26 6 54 4" stroke="#c9a46a" stroke-width="1.2" opacity=".7"/>
+    <g fill="#d98fa8" opacity=".8"><circle cx="18" cy="38" r="4"/><circle cx="40" cy="14" r="3.4"/></g>
+    <g fill="#7fa06a" opacity=".45"><ellipse cx="34" cy="31" rx="5.6" ry="2.8" transform="rotate(-24 34 31)"/></g>
+  </svg>
+  <svg class="vine br" viewBox="0 0 120 120" fill="none">
+    <path d="M4 56 C4 30 26 6 54 4" stroke="#c9a46a" stroke-width="1.2" opacity=".7"/>
+    <g fill="#d98fa8" opacity=".8"><circle cx="18" cy="38" r="4"/><circle cx="40" cy="14" r="3.4"/></g>
+    <g fill="#7fa06a" opacity=".45"><ellipse cx="34" cy="31" rx="5.6" ry="2.8" transform="rotate(-24 34 31)"/></g>
+  </svg>
+</div>
+
+<div class="stage">
+  <div class="topbar">
+    <button type="button" class="chip-btn" id="back" hidden>
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 18l-6-6 6-6"/></svg>
+      上一步
+    </button>
+    <span class="brandmark" id="brand" hidden></span>
+    <span style="flex:1"></span>
+    <button type="button" class="icon-btn" id="sound" aria-label="背景音乐开关" aria-pressed="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M9 18V5l10-2v13"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/><path id="mute-slash" d="M3 21L21 3"/></svg>
+    </button>
+  </div>
+
+  <div class="pages" id="pages"></div>
+  <div class="made" id="made" hidden></div>
+</div>
+
+<script>
+/* ═══ 改这里就行 ═══ */
+var INVITEE = "姐姐";        // 她的名字
+var HOST    = "弟弟";        // 你的称呼
+/* ═══════════════════ */
+
+var ACTS = [
+  { emo: "🍿", label: "看电影" },
+  { emo: "🍜", label: "吃饭" },
+  { emo: "🥤", label: "喝一杯" },
+  { emo: "🚶", label: "散步" }
+];
+var TIMES = [
+  { emo: "🗓️", label: "这个周末" },
+  { emo: "💞", label: "下周找一天" },
+  { emo: "🌙", label: "今天晚上" },
+  { emo: "⏰", label: "你方便的时候" }
+];
+var SPOTS = [
+  { emo: "📍", label: "市中心" },
+  { emo: "🪧", label: "你方便的地方" },
+  { emo: "🗺️", label: "学校附近" },
+  { emo: "🏡", label: "公司附近" }
+];
+
+var answer = { act: null, time: null, spot: null };
+var pagesEl = document.getElementById("pages");
+var backEl  = document.getElementById("back");
+var brandEl = document.getElementById("brand");
+var madeEl  = document.getElementById("made");
+
+/* ——— 小工具 ——— */
+function el(tag, cls, text) {
+  var n = document.createElement(tag);
+  if (cls) n.className = cls;
+  if (text != null) n.textContent = text;
+  return n;
+}
+function h1(lineA, lineB) {
+  var n = el("h1");
+  n.appendChild(document.createTextNode(lineA));
+  if (lineB) {
+    n.appendChild(document.createElement("br"));
+    var s = el("span", "glow", lineB);
+    n.appendChild(s);
+  }
+  return n;
+}
+function divider() {
+  var d = el("div", "divider");
+  d.innerHTML = "<b></b><i></i><b></b>";
+  return d;
+}
+function lede(lines) {
+  var p = el("p", "lede");
+  lines.forEach(function (t, i) {
+    if (i) p.appendChild(document.createElement("br"));
+    p.appendChild(document.createTextNode(t));
+  });
+  return p;
+}
+function fromLine() { return el("div", "from", "来自 · " + HOST); }
+
+/* ——— 选项组 ——— */
+function optionGroup(items, slot, tileMode, onChange) {
+  var box = el("div", tileMode ? "grid2" : "list");
+  var custom = null;
+
+  items.forEach(function (it) {
+    var b = el("button", "pick" + (tileMode ? " tile" : ""));
+    b.type = "button";
+    b.setAttribute("aria-pressed", "false");
+    b.dataset.label = it.label;
+    var e = el("span", "emo", it.emo);
+    var t = el("span", "txt", it.label);
+    b.appendChild(e); b.appendChild(t);
+    if (it.hint) {
+      var tag = el("span", tileMode ? "tag" : "tag-r", "TA 提议");
+      if (!tileMode) b.classList.add("row-tag");
+      b.appendChild(tag);
+    }
+    b.addEventListener("click", function () { select(it.label, it.emo, b); });
+    box.appendChild(b);
+  });
+
+  function clear() {
+    Array.prototype.forEach.call(box.querySelectorAll(".pick"), function (x) {
+      x.setAttribute("aria-pressed", "false");
+    });
+  }
+  function select(label, emo, node) {
+    clear();
+    if (custom) custom.setAttribute("aria-pressed", "false");
+    if (node) node.setAttribute("aria-pressed", "true");
+    answer[slot] = { label: label, emo: emo };
+    onChange();
+  }
+
+  var wrap = el("div", "mid");
+  wrap.appendChild(box);
+
+  // 自己写一个
+  var addBtn = el("button", "add", "＋ " + (tileMode ? "自己写一个" : (slot === "time" ? "自己选时间" : "自己选地点")));
+  addBtn.type = "button";
+  var input = document.createElement("input");
+  input.type = "text";
+  input.hidden = true;
+  input.placeholder = tileMode ? "想做的事……" : (slot === "time" ? "比如：周四晚上八点后" : "比如：我家楼下那条街");
+  input.id = "custom-" + slot;
+
+  addBtn.addEventListener("click", function () {
+    addBtn.hidden = true;
+    input.hidden = false;
+    input.focus();
+  });
+  input.addEventListener("input", function () {
+    var v = input.value.trim();
+    if (v) {
+      clear();
+      answer[slot] = { label: v, emo: "✍️" };
+    } else if (answer[slot] && answer[slot].emo === "✍️") {
+      answer[slot] = null;
+    }
+    onChange();
+  });
+
+  wrap.appendChild(addBtn);
+  wrap.appendChild(input);
+  return wrap;
+}
+
+/* ——— 页面定义 ——— */
+var SCREENS = {
+
+  cover: function () {
+    var p = el("div", "page");
+    var mid = el("div", "mid");
+    mid.appendChild(el("div", "to-chip", "致 · " + INVITEE));
+    mid.appendChild(h1("有人想约你，", "一起去做点什么。"));
+    mid.appendChild(lede(["不用急着回答，", "先看看是什么。"]));
+    mid.appendChild(divider());
+
+    var env = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    env.setAttribute("class", "envelope");
+    env.setAttribute("viewBox", "0 0 260 180");
+    env.innerHTML =
+      '<path d="M8 52 L130 8 L252 52 L252 168 Q252 174 246 174 L14 174 Q8 174 8 168 Z" fill="#f6ead3"/>' +
+      '<rect x="46" y="22" width="168" height="104" rx="4" fill="#fffaf0" stroke="#dcc9a6"/>' +
+      '<rect x="56" y="32" width="148" height="84" rx="2" fill="none" stroke="#e0cba4"/>' +
+      '<path d="M8 52 L130 112 L252 52 L252 60 L130 120 L8 60 Z" fill="#eaddc2"/>' +
+      '<path d="M8 168 L8 60 L120 118 Z" fill="#f0e3ca" opacity=".8"/>' +
+      '<path d="M252 168 L252 60 L140 118 Z" fill="#f0e3ca" opacity=".8"/>' +
+      '<path d="M60 150 Q130 120 200 150 L200 174 L60 174 Z" fill="#e8c07a"/>' +
+      '<path d="M96 150 Q78 128 60 150 Q82 160 96 150 Z" fill="#f0cf93"/>' +
+      '<path d="M164 150 Q182 128 200 150 Q178 160 164 150 Z" fill="#f0cf93"/>' +
+      '<circle cx="130" cy="150" r="15" fill="#d9a856"/>' +
+      '<circle cx="130" cy="150" r="10" fill="none" stroke="#f6ead3" stroke-width="1.4"/>' +
+      '<path d="M130 144 q5 6 0 12 q-5 -6 0 -12" fill="#f6ead3"/>' +
+      '<g fill="#d98fa8"><circle cx="40" cy="96" r="7"/><circle cx="226" cy="88" r="6"/><circle cx="54" cy="76" r="4.5"/></g>' +
+      '<g fill="#f3d2de"><circle cx="40" cy="96" r="2.6"/><circle cx="226" cy="88" r="2.2"/></g>' +
+      '<g fill="#8aa876" opacity=".9"><ellipse cx="30" cy="110" rx="12" ry="5" transform="rotate(-30 30 110)"/>' +
+      '<ellipse cx="236" cy="102" rx="11" ry="4.6" transform="rotate(26 236 102)"/></g>';
+    mid.appendChild(env);
+
+    p.appendChild(mid);
+    var bot = el("div", "bottom");
+    bot.appendChild(fromLine());
+    var go = el("button", "btn-gold", "打开邀请  →");
+    go.type = "button";
+    go.addEventListener("click", function () { show("intro"); });
+    bot.appendChild(go);
+    p.appendChild(bot);
+    return p;
+  },
+
+  intro: function () {
+    var p = el("div", "page");
+    var mid = el("div", "mid");
+    mid.appendChild(h1("一起做点什么"));
+    mid.appendChild(lede(["想了几件事，", "看看你喜欢哪个。"]));
+    mid.appendChild(divider());
+    p.appendChild(mid);
+    var bot = el("div", "bottom");
+    bot.appendChild(fromLine());
+    var go = el("button", "btn-gold", "继续看看  →");
+    go.type = "button";
+    go.addEventListener("click", function () { show("ask"); });
+    bot.appendChild(go);
+    p.appendChild(bot);
+    return p;
+  },
+
+  ask: function () {
+    var p = el("div", "page");
+    var mid = el("div", "mid");
+    mid.appendChild(h1("要不要一起?"));
+    mid.appendChild(lede(["挑一个你想做的，", "剩下的一起决定。"]));
+    mid.appendChild(divider());
+    p.appendChild(mid);
+
+    var bot = el("div", "bottom");
+    bot.appendChild(fromLine());
+    var row = el("div", "btn-row");
+    var yes = el("button", "btn-gold", "好呀  ♥");
+    yes.type = "button";
+    yes.addEventListener("click", function () { show("act"); });
+    var no = el("button", "btn-dark", "我再想想");
+    no.type = "button";
+    no.id = "shy";
+    row.appendChild(yes);
+    row.appendChild(no);
+    bot.appendChild(row);
+    var tip = el("p", "note-mini", " ");
+    tip.id = "shy-tip";
+    bot.appendChild(tip);
+    p.appendChild(bot);
+
+    setTimeout(function () { makeShy(no, tip); }, 0);
+    return p;
+  },
+
+  act: function () {
+    var p = el("div", "page");
+    var top = el("div", "mid");
+    top.appendChild(el("div", "eyebrow", "TA 想了几件事"));
+    top.appendChild(h1("你想", "一起做哪件?"));
+    p.appendChild(top);
+
+    var next = el("button", "btn-gold wide", "继续  →");
+    next.type = "button";
+    next.disabled = true;
+    next.addEventListener("click", function () { show("time"); });
+
+    p.appendChild(optionGroup(ACTS, "act", true, function () { next.disabled = !answer.act; }));
+    var bot = el("div", "bottom");
+    bot.appendChild(next);
+    p.appendChild(bot);
+    return p;
+  },
+
+  time: function () {
+    var p = el("div", "page");
+    var top = el("div", "mid");
+    top.appendChild(el("div", "eyebrow", "给期待留一个时间"));
+    top.appendChild(h1("什么时候", "去比较好。"));
+    p.appendChild(top);
+
+    var next = el("button", "btn-gold wide", "继续选择地点  →");
+    next.type = "button";
+    next.disabled = true;
+    next.addEventListener("click", function () { show("spot"); });
+
+    p.appendChild(optionGroup(TIMES, "time", false, function () { next.disabled = !answer.time; }));
+    var bot = el("div", "bottom");
+    bot.appendChild(next);
+    p.appendChild(bot);
+    return p;
+  },
+
+  spot: function () {
+    var p = el("div", "page");
+    var top = el("div", "mid");
+    top.appendChild(el("div", "eyebrow", "总要先碰个头"));
+    top.appendChild(h1("在哪里", "见面呢?"));
+    p.appendChild(top);
+
+    var next = el("button", "btn-gold wide", "确认地点并回应  →");
+    next.type = "button";
+    next.disabled = true;
+    next.addEventListener("click", function () { show("done"); });
+
+    p.appendChild(optionGroup(SPOTS, "spot", false, function () { next.disabled = !answer.spot; }));
+    var bot = el("div", "bottom");
+    bot.appendChild(next);
+    p.appendChild(bot);
+    return p;
+  },
+
+  done: function () {
+    var p = el("div", "page");
+    var mid = el("div", "mid");
+    mid.appendChild(el("div", "eyebrow", "就差告诉 TA 了"));
+    mid.appendChild(h1("这件事,", "就这么说定了。"));
+
+    var card = el("div", "card");
+    [["一起做", answer.act], ["时间", answer.time], ["地点", answer.spot]].forEach(function (pair) {
+      var line = el("div", "line");
+      line.appendChild(el("div", "k", pair[0]));
+      var v = el("div", "v");
+      v.appendChild(el("span", "emo", pair[1] ? pair[1].emo : "·"));
+      v.appendChild(el("span", null, pair[1] ? pair[1].label : "再商量"));
+      line.appendChild(v);
+      card.appendChild(line);
+    });
+    mid.appendChild(card);
+    mid.appendChild(el("p", "sent", "复制下面这段发给 " + HOST + "，就算约上了。"));
+
+    var box = el("pre", "copybox", summary());
+    mid.appendChild(box);
+    p.appendChild(mid);
+
+    var bot = el("div", "bottom");
+    var copy = el("button", "btn-gold wide", "复制并发给 " + HOST);
+    copy.type = "button";
+    var flash = el("p", "ok-flash", "已经复制好了，粘贴给 TA 就行 ♥");
+    flash.hidden = true;
+    copy.addEventListener("click", function () {
+      var text = summary();
+      function fail() {
+        flash.textContent = "长按上面那段文字，选中复制就行。";
+        flash.hidden = false;
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function () {
+          flash.textContent = "已经复制好了，粘贴给 TA 就行 ♥";
+          flash.hidden = false;
+        }, fail);
+      } else { fail(); }
+    });
+    bot.appendChild(copy);
+    bot.appendChild(flash);
+    var again = el("button", "btn-dark wide", "我想改一下");
+    again.type = "button";
+    again.addEventListener("click", function () { show("act"); });
+    bot.appendChild(again);
+    p.appendChild(bot);
+    return p;
+  }
+};
+
+function summary() {
+  return "我答应啦 ♥\n一起做：" + (answer.act ? answer.act.label : "再商量") +
+         "\n时间：" + (answer.time ? answer.time.label : "再商量") +
+         "\n地点：" + (answer.spot ? answer.spot.label : "再商量");
+}
+
+/* ——— 会躲的按钮 ——— */
+function makeShy(btn, tip) {
+  var tries = 0;
+  var lines = [
+    "……这个按钮好像有点躲你。",
+    "它又跑了。",
+    "再试试？它好像不太想被点到。",
+    "好吧，它是故意的。",
+    "左边那个一直在等你。"
+  ];
+  btn.style.position = "relative";
+  btn.style.transition = "transform .22s cubic-bezier(.3,1.4,.5,1)";
+
+  function flee(e) {
+    if (e) e.preventDefault();
+    var r = btn.getBoundingClientRect();
+    var pad = 14;
+    var dx, dy, tries2 = 0;
+    do {
+      dx = (Math.random() * 2 - 1) * 110;
+      dy = (Math.random() * 2 - 1) * 90;
+      tries2++;
+    } while (tries2 < 12 && (
+      r.left + dx < pad ||
+      r.right + dx > window.innerWidth - pad ||
+      r.top + dy < pad ||
+      r.bottom + dy > window.innerHeight - pad
+    ));
+    if (r.left + dx < pad || r.right + dx > window.innerWidth - pad) dx = -dx;
+    if (r.top + dy < pad || r.bottom + dy > window.innerHeight - pad) dy = -dy;
+    var cur = btn.__off || { x: 0, y: 0 };
+    btn.__off = { x: cur.x + dx, y: cur.y + dy };
+    btn.style.transform = "translate(" + btn.__off.x + "px," + btn.__off.y + "px)";
+    tip.textContent = lines[Math.min(tries, lines.length - 1)];
+    tries++;
+  }
+
+  btn.addEventListener("pointerdown", flee);
+  btn.addEventListener("touchstart", flee, { passive: false });
+  btn.addEventListener("mouseenter", flee);
+  btn.addEventListener("click", function (e) { e.preventDefault(); });
+}
+
+/* ——— 导航 ——— */
+var ORDER = ["cover", "intro", "ask", "act", "time", "spot", "done"];
+var history_ = [];
+var current = null;
+
+function show(name, isBack) {
+  if (current && !isBack) history_.push(current);
+  current = name;
+  pagesEl.textContent = "";
+  pagesEl.appendChild(SCREENS[name]());
+  var deep = ORDER.indexOf(name) >= 3;
+  backEl.hidden = history_.length === 0;
+  brandEl.hidden = !deep;
+  brandEl.textContent = HOST;
+  madeEl.hidden = !deep;
+  madeEl.textContent = "为 " + INVITEE + " 做的";
+  pagesEl.scrollTop = 0;
+}
+
+backEl.addEventListener("click", function () {
+  if (!history_.length) return;
+  show(history_.pop(), true);
+});
+
+show("cover");
+
+/* ——— 背景音：一段慢慢绕的和弦，默认关闭 ——— */
+(function music() {
+  var btn = document.getElementById("sound");
+  var slash = document.getElementById("mute-slash");
+  var ctx = null, bus = null, timer = null, on = false, bar = 0;
+
+  // Cmaj7 → Am7 → Fmaj7 → G，走四巡回到开头
+  var CHORDS = [
+    [48, 52, 55, 59],
+    [45, 52, 55, 60],
+    [41, 45, 48, 52],
+    [43, 50, 55, 59]
+  ];
+  var BAR = 3800;
+
+  function mtof(m) { return 440 * Math.pow(2, (m - 69) / 12); }
+
+  function build() {
+    ctx = new (window.AudioContext || window.webkitAudioContext)();
+
+    var master = ctx.createGain();
+    master.gain.value = 0.9;
+    master.connect(ctx.destination);
+
+    // 一点回声，听起来有空间
+    var delay = ctx.createDelay(1);
+    delay.delayTime.value = 0.34;
+    var fb = ctx.createGain();
+    fb.gain.value = 0.3;
+    var wet = ctx.createGain();
+    wet.gain.value = 0.34;
+    delay.connect(fb); fb.connect(delay);
+    delay.connect(wet); wet.connect(master);
+
+    // 滤掉高频的毛刺，声音柔一点
+    bus = ctx.createBiquadFilter();
+    bus.type = "lowpass";
+    bus.frequency.value = 1900;
+    bus.Q.value = 0.4;
+    bus.connect(master);
+    bus.connect(delay);
+  }
+
+  function voice(f, at, dur, peak) {
+    var o = ctx.createOscillator();
+    var o2 = ctx.createOscillator();
+    var g = ctx.createGain();
+    o.type = "sine"; o.frequency.value = f;
+    o2.type = "triangle"; o2.frequency.value = f * 1.0035;
+    g.gain.setValueAtTime(0.0001, at);
+    g.gain.linearRampToValueAtTime(peak, at + 0.08);
+    g.gain.exponentialRampToValueAtTime(0.0001, at + dur);
+    o.connect(g); o2.connect(g); g.connect(bus);
+    o.start(at); o2.start(at);
+    o.stop(at + dur + 0.05); o2.stop(at + dur + 0.05);
+  }
+
+  function playBar() {
+    var ch = CHORDS[bar % CHORDS.length];
+    var t0 = ctx.currentTime + 0.05;
+
+    // 低音先落下
+    voice(mtof(ch[0] - 12), t0, 4.2, 0.034);
+
+    // 琶音一颗一颗铺开
+    for (var i = 0; i < ch.length; i++) {
+      voice(mtof(ch[i]), t0 + i * 0.42, 3.4 - i * 0.2, 0.042 - i * 0.004);
+    }
+
+    // 巡末落一颗高音
+    var top = ch[1 + Math.floor(Math.random() * 3)] + 12;
+    voice(mtof(top), t0 + 2.25, 2.6, 0.03);
+
+    bar++;
+  }
+
+  btn.addEventListener("click", function () {
+    on = !on;
+    btn.setAttribute("aria-pressed", String(on));
+    slash.style.display = on ? "none" : "";
+    if (on) {
+      try {
+        if (!ctx) build();
+        if (ctx.state === "suspended") ctx.resume();
+        playBar();
+        timer = setInterval(playBar, BAR);
+      } catch (e) {
+        on = false;
+        btn.setAttribute("aria-pressed", "false");
+        slash.style.display = "";
+      }
+    } else {
+      clearInterval(timer);
+    }
+  });
+})();
+
+/* ——— 背景：粉树、逆光、水面、长椅（只画一次） ——— */
+(function sakura() {
+  var canvas = document.getElementById("sakura");
+  var ctx = canvas.getContext("2d");
+  var W = 0, H = 0, rnd;
+
+  // 固定种子，保证每次打开长得一样
+  function seeded(a) {
+    return function () {
+      a |= 0; a = a + 0x6D2B79F5 | 0;
+      var t = Math.imul(a ^ a >>> 15, 1 | a);
+      t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+  }
+  function rr(a, b) { return a + rnd() * (b - a); }
+
+  var PETALS = ["#f4738f", "#e8527a", "#ff9ab0", "#c8386a", "#ffc2cf", "#d94a74", "#b32e60"];
+
+  function bloom(x, y, r, n, alphaMax) {
+    for (var i = 0; i < n; i++) {
+      var a = rnd() * 6.283;
+      var d = Math.pow(rnd(), .55) * r;
+      var px = x + Math.cos(a) * d;
+      var py = y + Math.sin(a) * d * .82;
+      var s = 1.3 + rnd() * 4.6;
+      ctx.globalAlpha = (.28 + rnd() * .62) * alphaMax;
+      ctx.fillStyle = PETALS[(rnd() * PETALS.length) | 0];
+      ctx.beginPath();
+      ctx.arc(px, py, s, 0, 6.283);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  function branch(x, y, ang, len, w, depth) {
+    if (depth <= 0 || len < 7) return;
+    var x2 = x + Math.cos(ang) * len;
+    var y2 = y + Math.sin(ang) * len;
+    var mx = (x + x2) / 2 + Math.cos(ang + Math.PI / 2) * len * rr(-.22, .22);
+    var my = (y + y2) / 2 + Math.sin(ang + Math.PI / 2) * len * rr(-.22, .22);
+
+    ctx.strokeStyle = "#1d0f1c";
+    ctx.lineCap = "round";
+    ctx.lineWidth = w;
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.quadraticCurveTo(mx, my, x2, y2);
+    ctx.stroke();
+
+    if (depth <= 3) bloom(x2, y2, 14 + len * .5, 14 + (4 - depth) * 10, depth <= 2 ? 1 : .7);
+
+    var n = depth > 4 ? 2 : (rnd() < .78 ? 2 : 3);
+    for (var i = 0; i < n; i++) {
+      branch(x2, y2, ang + rr(-.62, .62), len * rr(.58, .82), w * .63, depth - 1);
+    }
+  }
+
+  function draw() {
+    rnd = seeded(20261026);
+    ctx.clearRect(0, 0, W, H);
+    var horizon = H * 0.56;
+    var sx = W * 0.72, sy = horizon * 0.58;
+
+    // 天空
+    var sky = ctx.createLinearGradient(0, 0, 0, horizon);
+    sky.addColorStop(0, "#2b1030");
+    sky.addColorStop(.42, "#5e1f45");
+    sky.addColorStop(.78, "#a8406a");
+    sky.addColorStop(1, "#d9728c");
+    ctx.fillStyle = sky;
+    ctx.fillRect(0, 0, W, horizon);
+
+    // 水面
+    var wat = ctx.createLinearGradient(0, horizon, 0, H);
+    wat.addColorStop(0, "#c06a86");
+    wat.addColorStop(.22, "#7a3a63");
+    wat.addColorStop(.62, "#3a1d48");
+    wat.addColorStop(1, "#1b1030");
+    ctx.fillStyle = wat;
+    ctx.fillRect(0, horizon, W, H - horizon);
+
+    // 逆光
+    var sun = ctx.createRadialGradient(sx, sy, 0, sx, sy, Math.max(W, H) * .45);
+    sun.addColorStop(0, "rgba(255,248,232,.95)");
+    sun.addColorStop(.05, "rgba(255,226,192,.62)");
+    sun.addColorStop(.26, "rgba(255,172,152,.2)");
+    sun.addColorStop(1, "rgba(255,150,140,0)");
+    ctx.fillStyle = sun;
+    ctx.fillRect(0, 0, W, H);
+
+    // 星芒
+    ctx.save();
+    ctx.globalCompositeOperation = "lighter";
+    ctx.translate(sx, sy);
+    for (var i = 0; i < 6; i++) {
+      var len = (i % 2 ? .26 : .17) * Math.max(W, H);
+      var gr = ctx.createLinearGradient(0, 0, len, 0);
+      gr.addColorStop(0, "rgba(255,244,222,.8)");
+      gr.addColorStop(1, "rgba(255,210,180,0)");
+      ctx.fillStyle = gr;
+      ctx.beginPath();
+      ctx.moveTo(0, -2.2); ctx.lineTo(len, 0); ctx.lineTo(0, 2.2);
+      ctx.closePath(); ctx.fill();
+      ctx.rotate(Math.PI / 3 + (i === 2 ? .22 : 0));
+    }
+    ctx.restore();
+
+    // 水上的碎光
+    ctx.save();
+    ctx.globalCompositeOperation = "lighter";
+    for (var j = 0; j < 320; j++) {
+      var t = rnd();
+      var y = horizon + Math.pow(t, 1.25) * (H - horizon);
+      var spread = 50 + t * W * .62;
+      var x = sx + (rnd() - .5) * spread * 2;
+      var w = 3 + rnd() * 44 * (.3 + t);
+      var h = 1 + rnd() * 2.1;
+      ctx.globalAlpha = (.05 + (1 - t) * .34) * rnd();
+      ctx.fillStyle = rnd() < .62 ? "#ffd9c4" : "#ff9fb8";
+      ctx.fillRect(x - w / 2, y, w, h);
+    }
+    // 水里的花影
+    for (var k = 0; k < 90; k++) {
+      var ty = rnd();
+      ctx.globalAlpha = (1 - ty) * .22 * rnd();
+      ctx.fillStyle = PETALS[(rnd() * PETALS.length) | 0];
+      ctx.beginPath();
+      ctx.ellipse(rnd() * W, horizon + ty * (H - horizon) * .8,
+                  6 + rnd() * 22, 2 + rnd() * 5, 0, 0, 6.283);
+      ctx.fill();
+    }
+    ctx.restore();
+    ctx.globalAlpha = 1;
+
+    // 远处的花团（枝条后面）
+    for (var m = 0; m < 46; m++) {
+      bloom(rnd() * W, rnd() * horizon * .95, 26 + rnd() * 60, 26, .34);
+    }
+
+    // 树枝
+    var big = Math.max(W, H);
+    branch(-W * .06, H * .40, -0.26, big * .20, Math.max(12, W * .035), 7);
+    branch(W * .10, -H * .03, 1.16, big * .16, Math.max(9, W * .026), 6);
+    branch(W * 1.05, H * .13, 2.72, big * .17, Math.max(8, W * .024), 6);
+    branch(-W * .04, H * .12, 0.42, big * .13, Math.max(7, W * .02), 5);
+
+    // 岸与长椅
+    ctx.fillStyle = "#140a1c";
+    ctx.beginPath();
+    ctx.moveTo(0, H);
+    ctx.lineTo(0, H * .80);
+    ctx.quadraticCurveTo(W * .22, H * .845, W * .46, H);
+    ctx.closePath();
+    ctx.fill();
+
+    var bx = W * .17, by = H * .855, bw = Math.max(96, W * .30), bh = bw * .46;
+    ctx.save();
+    ctx.translate(bx, by);
+    ctx.rotate(.04);
+    ctx.fillStyle = "#160c1e";
+    // 椅背
+    for (var s = 0; s < 3; s++) {
+      ctx.fillRect(-bw * .5, -bh * (.92 - s * .22), bw, bh * .13);
+    }
+    // 坐面
+    ctx.fillRect(-bw * .5, -bh * .1, bw, bh * .15);
+    // 腿与扶手
+    ctx.fillRect(-bw * .46, -bh * .1, bh * .1, bh * .62);
+    ctx.fillRect(bw * .36, -bh * .1, bh * .1, bh * .62);
+    ctx.fillRect(-bw * .5, -bh * .95, bh * .09, bh * .9);
+    ctx.fillRect(bw * .41, -bh * .95, bh * .09, bh * .9);
+    // 椅面上的一道反光
+    ctx.fillStyle = "rgba(255,214,170,.28)";
+    ctx.fillRect(-bw * .5, -bh * .1, bw, 2);
+    ctx.restore();
+
+    // 石子
+    for (var g2 = 0; g2 < 60; g2++) {
+      ctx.globalAlpha = .5 + rnd() * .4;
+      ctx.fillStyle = rnd() < .3 ? "#2a1a28" : "#0f0716";
+      ctx.beginPath();
+      ctx.ellipse(rnd() * W * .5, H * (.88 + rnd() * .12),
+                  3 + rnd() * 9, 2 + rnd() * 5, rnd() * 3, 0, 6.283);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+
+    // 压暗，保证文字读得清
+    var ov = ctx.createLinearGradient(0, 0, 0, H);
+    ov.addColorStop(0, "rgba(22,9,36,.58)");
+    ov.addColorStop(.34, "rgba(22,9,36,.44)");
+    ov.addColorStop(.66, "rgba(22,9,36,.5)");
+    ov.addColorStop(1, "rgba(13,5,24,.7)");
+    ctx.fillStyle = ov;
+    ctx.fillRect(0, 0, W, H);
+  }
+
+  function size() {
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = canvas.clientWidth; H = canvas.clientHeight;
+    if (!W || !H) return;
+    canvas.width = Math.round(W * dpr);
+    canvas.height = Math.round(H * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    draw();
+  }
+
+  size();
+  var t = null;
+  window.addEventListener("resize", function () {
+    clearTimeout(t);
+    t = setTimeout(size, 160);
+  });
+})();
+
+/* ——— 背景：往上飘的心 ——— */
+(function hearts() {
+  var canvas = document.getElementById("hearts");
+  var ctx = canvas.getContext("2d");
+  var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  var COLORS = ["#f3a6c0", "#e07a9a", "#f3cf93", "#fde9dd", "#f3a6c0", "#f3cf93"];
+  var W = 0, H = 0, ps = [], cache = {};
+
+  function rand(a, b) { return a + Math.random() * (b - a); }
+  function pick(a) { return a[Math.floor(Math.random() * a.length)]; }
+
+  function heartXY(t) {
+    return {
+      x: 16 * Math.pow(Math.sin(t), 3),
+      y: -(13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t))
+    };
+  }
+  function sprite(size, color) {
+    var key = size + color;
+    if (cache[key]) return cache[key];
+    var pad = Math.ceil(size * 0.75);
+    var c = document.createElement("canvas");
+    c.width = c.height = size + pad * 2;
+    var x = c.getContext("2d");
+    x.translate(c.width / 2, c.height / 2);
+    x.shadowColor = color;
+    x.shadowBlur = size * 0.9;
+    x.fillStyle = color;
+    var k = size / 34;
+    x.beginPath();
+    for (var i = 0; i <= 48; i++) {
+      var p = heartXY(i / 48 * Math.PI * 2);
+      if (i === 0) x.moveTo(p.x * k, p.y * k); else x.lineTo(p.x * k, p.y * k);
+    }
+    x.closePath();
+    x.fill();
+    x.shadowBlur = size * 0.45;
+    x.fill();
+    cache[key] = c;
+    return c;
+  }
+
+  function spawn(anywhere) {
+    var depth = Math.random();
+    return {
+      x: rand(-20, W + 20),
+      y: anywhere ? rand(0, H) : H + rand(10, 90),
+      size: 7 + depth * 19,
+      vy: 0.16 + depth * 0.44,
+      sway: rand(14, 40) * (1 - depth * .5),
+      phase: rand(0, Math.PI * 2),
+      spin: rand(-.3, .3),
+      rot: rand(-.3, .3),
+      alpha: 0.16 + depth * 0.48,
+      color: pick(COLORS)
+    };
+  }
+
+  function size() {
+    var dpr = Math.min(window.devicePixelRatio || 1, 2);
+    W = canvas.clientWidth; H = canvas.clientHeight;
+    if (!W || !H) return;
+    canvas.width = Math.round(W * dpr);
+    canvas.height = Math.round(H * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    var n = Math.round(W * H / 17000) + 14;
+    if (n > 52) n = 52;
+    ps = [];
+    for (var i = 0; i < n; i++) ps.push(spawn(true));
+  }
+
+  function step(dt, t) {
+    ctx.clearRect(0, 0, W, H);
+    ctx.globalCompositeOperation = "lighter";
+    for (var i = 0; i < ps.length; i++) {
+      var p = ps[i];
+      p.y -= p.vy * dt * 0.06;
+      p.rot += p.spin * dt * 0.0006;
+      var x = p.x + Math.sin(t * 0.0006 + p.phase) * p.sway;
+      var fadeIn = Math.min(1, (H - p.y) / 90);
+      var fadeOut = Math.min(1, p.y / (H * 0.34));
+      ctx.globalAlpha = p.alpha * Math.max(0, Math.min(fadeIn, fadeOut));
+      var sp = sprite(Math.round(p.size), p.color);
+      ctx.save();
+      ctx.translate(x, p.y);
+      ctx.rotate(Math.sin(t * 0.0004 + p.phase) * 0.22 + p.rot);
+      ctx.drawImage(sp, -sp.width / 2, -sp.height / 2);
+      ctx.restore();
+      if (p.y < -60) ps[i] = spawn(false);
+    }
+    ctx.globalAlpha = 1;
+    ctx.globalCompositeOperation = "source-over";
+  }
+
+  size();
+  window.addEventListener("resize", size);
+
+  if (reduced) { step(16, 1200); return; }
+
+  var last = 0;
+  function frame(now) {
+    if (!document.hidden && W) {
+      var dt = last ? Math.min(now - last, 48) : 16;
+      step(dt, now);
+    }
+    last = now;
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
+
+</body></html>
